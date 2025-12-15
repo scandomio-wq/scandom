@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>ScanDom.io — Signaler un incident en un scan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --pink: #ff4f70;
+      --pink-soft: #ff7a88;
+      --violet: #8b5cf6;
+      --primary: #ffffff;
+      --text-main: #111827;
+      --text-soft: #6b7280;
+      --bg-card: #ffffff;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      background: linear-gradient(135deg, var(--pink) 0%, var(--pink-soft) 50%, #ffb199 100%);
+      color: var(--text-main);
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1200px;
+      padding: 24px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* HEADER */
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: #ffffff;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 20% 10%, #ffffff 0, #ffe4e6 20%, #fb7185 55%, #db2777 100%);
+      box-shadow:
+        0 0 0 2px rgba(251, 113, 133, 0.6),
+        0 8px 25px rgba(190, 24, 93, 0.6);
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      font-size: 0.7rem;
+      opacity: 0.85;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .link-muted {
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: #fee2e2;
+    }
+
+    .link-muted:hover {
+      text-decoration: underline;
+    }
+
+    .btn-connexion {
+      padding: 0.45rem 1.3rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 241, 242, 0.9);
+      background: rgba(248, 250, 252, 0.1);
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(10px);
+      transition:
+        background 0.15s ease,
+        transform 0.08s ease,
+        box-shadow 0.1s ease;
+    }
+
+    .btn-connexion:hover {
+      background: rgba(248, 250, 252, 0.25);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+    }
+
+    /* MAIN CARD (style Zyro : gros bloc blanc) */
+
+    .card {
+      margin-top: 8px;
+      background: var(--bg-card);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow:
+        0 20px 60px rgba(15, 23, 42, 0.18);
+      padding: 32px 32px 34px;
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(280px, 2.3fr);
+      gap: 32px;
+    }
+
+    @media (max-width: 900px) {
+      .card {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* LEFT HERO */
+
+    .hero {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .hero-kicker {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-soft);
+    }
+
+    .hero-title {
+      font-size: clamp(2.1rem, 4vw, 2.7rem);
+      line-height: 1.1;
+      font-weight: 700;
+    }
+
+    .hero-title span.accent {
+      color: #db2777;
+    }
+
+    .hero-sub {
+      max-width: 30rem;
+      font-size: 1rem;
+      color: var(--text-soft);
+      line-height: 1.5;
+    }
+
+    .hero-sub strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .btn-primary {
+      padding: 0.9rem 1.9rem;
+      border-radius: 999px;
+      border: none;
+      background: #111827;
+      color: #f9fafb;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.35);
+      transition:
+        transform 0.08s ease,
+        box-shadow 0.1s ease,
+        filter 0.1s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+    }
+
+    .hero-caption {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+
+    .hero-caption strong {
+      color: var(--text-main);
+    }
+
+    /* RIGHT MOCKUP (workflow) */
+
+    .panel {
+      border-radius: 20px;
+      background: radial-gradient(circle at top left, #f9fafb 0, #e5e7eb 50%, #c7d2fe 100%);
+      padding: 18px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-main-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .panel-main-sub {
+      font-size: 0.86rem;
+      color: var(--text-soft);
+      margin-bottom: 10px;
+    }
+
+    .panel-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    .panel-step {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-step-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-step-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: #fee2e2;
+      color: #b91c1c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+    }
+
+    .panel-step-label {
+      color: var(--text-main);
+    }
+
+    .panel-step-arrow {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .panel-footer {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #e5e7eb;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-footer strong {
+      color: var(--text-main);
+    }
+
+    /* ==== PAGE À IMPRIMER ==== */
+
+    .print-page {
+      display: none;
+    }
+
+    .print-sheet {
+      width: 210mm;
+      height: 297mm;
+      padding: 18mm;
+      box-sizing: border-box;
+      background: #ffffff;
+      color: #111827;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      position: relative;
+    }
+
+    .print-header {
+      text-align: center;
+      margin-bottom: 18mm;
+    }
+
+    .print-title {
+      display: inline-block;
+      padding: 6px 18px;
+      background: #ec4899;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 6px;
+    }
+
+    .print-subtitle {
+      margin-top: 12mm;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #4b5563;
+    }
+
+    .print-body {
+      text-align: center;
+      margin-top: 10mm;
+    }
+
+    .qr-wrapper {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8mm;
+    }
+
+    .qr-box {
+      width: 50mm;
+      height: 50mm;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4mm;
+    }
+
+    .qr-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .whatsapp-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6mm;
+      font-size: 11px;
+      color: #111827;
+    }
+
+    .whatsapp-logo {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #25d366;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: system-ui, sans-serif;
+    }
+
+    .print-footer {
+      position: absolute;
+      left: 18mm;
+      right: 18mm;
+      bottom: 16mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #9ca3af;
+    }
+
+    .print-footer-logo {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    /* PRINT */
+
+    @media print {
+      body {
+        background: #ffffff;
+        margin: 0;
+      }
+      .page { display: none; }
+      .print-page { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="brand">
+        <img
+          src="logo.JPG"
+          style="width:13%"/>
+        <div>
+          <div class="brand-sub">Signalement d’incidents</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="#" class="link-muted">Produit</a>
+        <a href="#" class="link-muted">Pour les gestionnaires</a>
+        <button class="btn-connexion" type="button">Connexion</button>
+      </div>
+    </header>
+
+    <main class="card">
+      <section class="hero">
+        <div class="hero-kicker">QR codes · WhatsApp · Copropriétés</div>
+
+        <h1 class="hero-title">
+          Avec ScanDom.io,<br>
+          <span class="accent">un scan suffit pour signaler.</span>
+        </h1>
+
+        <p class="hero-sub">
+          Imprimez une fiche QR, affichez-la dans les parties communes,
+          et laissez les résidents ouvrir un formulaire pour
+          décrire le problème. <strong>C’est aussi simple que ça.</strong>
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn-primary" type="button" onclick="window.print()">
+            🖨️ Imprimer la fiche&nbsp;QR
+          </button>
+          <div class="hero-caption">
+            <strong>ScanDom.io</strong> — une feuille, un scan, un signalement.
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel" aria-hidden="true">
+        <div>
+          <div class="panel-main-title">Comment ça se passe&nbsp;?</div>
+          <div class="panel-main-sub">
+            De l’affiche QR à la notification gestionnaire, en cinq étapes.
+          </div>
+        </div>
+        <div class="panel-flow">
+          <div class="panel-step">
+            <div class="panel-step-left">
+              <div class="panel-step-icon">▢</div>
+              <div class="panel-step-label">Le résident scanne le QR</div>
+            </div>
+            <div class="panel-step-arrow">Étape 1</div>
+          </div>
+          <div class="panel-step">
+            <div class="panel-step-left">
+              <div class="panel-step-icon">📍</div>
+              <div class="panel-step-label">Zone de l’immeuble identifiée</div>
+            </div>
+            <div class="panel-step-arrow">Étape 2</div>
+          </div>
+          <div class="panel-step">
+            <div class="panel-step-left">
+              <div class="panel-step-icon">💬</div>
+              <div class="panel-step-label">Saisie très simple sur un formulaire</div>
+            </div>
+            <div class="panel-step-arrow">Étape 3</div>
+          </div>
+          <div class="panel-step">
+            <div class="panel-step-left">
+              <div class="panel-step-icon">📡</div>
+              <div class="panel-step-label">Incident enregistré et notifié</div>
+            </div>
+            <div class="panel-step-arrow">Étape 4</div>
+          </div>
+          <div class="panel-step">
+            <div class="panel-step-left">
+              <div class="panel-step-icon">✅</div>
+              <div class="panel-step-label">Suivi : ouvert · en cours · résolu</div>
+            </div>
+            <div class="panel-step-arrow">Étape 5</div>
+          </div>
+        </div>
+        <div class="panel-footer">
+          <span>Temps moyen de déclaration&nbsp;: <strong>&lt; 60&nbsp;s</strong></span>
+          <span>Immeubles actifs&nbsp;: <strong>12+</strong></span>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+</body>
+</html>
