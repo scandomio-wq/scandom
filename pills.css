@@ -1,0 +1,56 @@
+/* Pills styles */
+.pills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.pills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background-color: #f3f4f6;
+  color: #0f172a;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  text-align: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.pill:hover {
+  background-color: #e5e7eb;
+}
+
+.pill.selected {
+  background-color: #2563eb;
+  color: white;
+  border-color: #1d4ed8;
+}
+
+.pill svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+.pill span {
+  white-space: nowrap;
+}
+
+/* Hide original category radio groups to prevent duplicates with pills */
+#catSimple,
+#catAdvanced {
+  display: none !important;
+}
