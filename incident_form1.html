@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>ScanDom – Signalement d'incident</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/heroicons/2.0.18/heroicons.min.css" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #ffffff;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --accent-strong: #1d4ed8;
+      --text-main: #0f172a;
+      --text-soft: #6b7280;
+      --danger: #dc2626;
+      --border: #e5e7eb;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+    }
+
+    .page { width: 100%; max-width: 1100px; }
+
+    .hero {
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      padding: 20px 28px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.7);
+    }
+
+    .hero h1 { margin: 0 0 4px; font-size: 1.6rem; font-weight: 600; }
+
+    .hero-location {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+      font-size: 0.95rem;
+      color: #cbd5f5;
+    }
+
+    .hero-location a { color: #9ca3af; text-decoration: none; font-size: 0.85rem; }
+    .hero-location a:hover { text-decoration: underline; }
+
+    .hero-subtitle { margin-top: 8px; font-size: 0.95rem; color: #9ca3af; }
+
+    /* ✅ 1 colonne */
+    .layout {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-title span.subtitle {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--text-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .radio-group { display: flex; flex-direction: column; gap: 6px; }
+
+    /* Styles pour les pills */
+    .pills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .pills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 16px;
+      border-radius: 20px;
+      background-color: #f3f4f6;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .pill:hover {
+      background-color: #e5e7eb;
+    }
+
+    .pill.selected {
+      background-color: var(--accent);
+      color: white;
+      border-color: var(--accent-strong);
+    }
+
+    .pill i { margin-right: 6px; font-size: 1.1em; }
+    .pill span { white-space: nowrap; }
+
+    .pill-selected span.value { font-weight: 500; }
+
+    .toggle-link {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-left: 6px;
+      font-size: 0.8rem;
+      color: var(--accent-strong);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .toggle-link:hover { color: #1e40af; }
+
+    .floor-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .btn-ghost {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      padding: 4px 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      min-width: 32px;
+    }
+
+    .btn-ghost:hover { background: #f3f4f6; }
+
+    .floor-label { flex: 1; text-align: center; font-weight: 500; font-size: 0.95rem; }
+
+    .floor-hint { font-size: 0.8rem; color: var(--text-soft); margin-top: 4px; }
+
+    .field { margin-bottom: 10px; }
+
+    .field label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px; }
+
+    .field small { display: block; font-size: 0.75rem; color: var(--text-soft); margin-top: 2px; }
+
+    input[type="text"], input[type="email"], textarea {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 7px 9px;
+      font-size: 0.9rem;
+    }
+
+    textarea { resize: vertical; min-height: 70px; }
+
+    input[type="file"] { font-size: 0.85rem; }
+
+    .checkbox-inline { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; }
+    .checkbox-inline input { accent-color: var(--accent); }
+
+    .actions {
+      margin-top: 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: #ffffff;
+      padding: 7px 16px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.45);
+    }
+
+    .btn-primary:hover { filter: brightness(1.05); }
+
+    .btn-secondary {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--text-main);
+      padding: 7px 14px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .hint { font-size: 0.78rem; color: var(--text-soft); margin-top: 3px; }
+    .error { color: var(--danger); font-size: 0.8rem; margin-top: 4px; }
+    .incidents-list { margin-top: 6px; }
+  </style>
+  <link rel="stylesheet" href="pills.css" />
+</head>
+
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>Je souhaite signaler un incident</h1>
+      <div class="hero-location">
+        <div>
+          <strong>20 rue du Clos Lucé – Bâtiment 5</strong><br />
+          Courbevoie (92400)
+        </div>
+        <div>
+          <a href="#">Ce n'est pas mon bâtiment</a>
+        </div>
+      </div>
+      <div class="hero-subtitle">
+        Sélectionnez la zone, la catégorie, puis décrivez le problème. Les informations seront transmises au gestionnaire du bâtiment.
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- 1) Étage / niveau -->
+      <section class="card">
+        <div class="card-title"><span>Étage / niveau</span></div>
+
+        <div class="floor-control">
+          <button id="btnFloorMinus" type="button" class="btn-ghost">−</button>
+          <div id="floorLabel" class="floor-label">RDC / RDJ / RR</div>
+          <button id="btnFloorPlus" type="button" class="btn-ghost">+</button>
+        </div>
+        <div class="floor-hint">Plage autorisée : du 2e sous-sol à 7e étage.</div>
+      </section>
+
+      <!-- 2) Zone de l'incident -->
+      <section class="card">
+        <div class="card-title">
+          <span>Zone de l'incident</span>
+          <span class="subtitle">
+            <span class="section-label">Zone sélectionnée</span>
+            <span class="pill-selected">Zone : <span id="zoneSelected" class="value">—</span></span>
+          </span>
+        </div>
+
+        <div id="zoneSimple" class="pills-container">
+          <div class="pill" data-value="2" data-group="zoneSimple">
+            <i class="hi hi-arrow-right"></i>
+            <span>Couloir</span>
+          </div>
+          <div class="pill" data-value="3" data-group="zoneSimple">
+            <i class="hi hi-arrow-up"></i>
+            <span>Ascenseur</span>
+          </div>
+        </div>
+
+        <div id="zoneAdvanced" class="pills-container" style="display:none; margin-top:6px">
+          <div class="pills-grid">
+            <div class="pill" data-value="1" data-group="zoneAdvanced">
+              <i class="hi hi-home"></i>
+              <span>Hall</span>
+            </div>
+            <div class="pill" data-value="2" data-group="zoneAdvanced">
+              <i class="hi hi-arrow-right"></i>
+              <span>Couloir</span>
+            </div>
+            <div class="pill" data-value="3" data-group="zoneAdvanced">
+              <i class="hi hi-arrow-up"></i>
+              <span>Ascenseur</span>
+            </div>
+            <div class="pill" data-value="4" data-group="zoneAdvanced">
+              <i class="hi hi-sort-amount-asc"></i>
+              <span>Escalier</span>
+            </div>
+            <div class="pill" data-value="5" data-group="zoneAdvanced">
+              <i class="hi hi-building"></i>
+              <span>Façade</span>
+            </div>
+            <div class="pill" data-value="6" data-group="zoneAdvanced">
+              <i class="hi hi-envelope"></i>
+              <span>Boîtes aux lettres</span>
+            </div>
+            <div class="pill" data-value="7" data-group="zoneAdvanced">
+              <i class="hi hi-bicycle"></i>
+              <span>Local vélos</span>
+            </div>
+            <div class="pill" data-value="8" data-group="zoneAdvanced">
+              <i class="hi hi-cog"></i>
+              <span>Local technique</span>
+            </div>
+            <div class="pill" data-value="9" data-group="zoneAdvanced">
+              <i class="hi hi-tree"></i>
+              <span>Cour / Jardin</span>
+            </div>
+            <div class="pill" data-value="10" data-group="zoneAdvanced">
+              <i class="hi hi-ellipsis-h"></i>
+              <span>Autre</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hint">
+          <button id="btnZoneMore" class="toggle-link" type="button">+ de zones</button>
+          <button id="btnZoneLess" class="toggle-link" type="button" style="display:none">moins de zones</button>
+        </div>
+      </section>
+
+      <!-- 3) Catégorie -->
+      <section class="card">
+        <div class="card-title">
+          <span>Catégorie</span>
+          <span class="subtitle">
+            <span class="section-label">Catégorie sélectionnée</span>
+            <span class="pill-selected">Catégorie : <span id="categorieSelected" class="value">—</span></span>
+          </span>
+        </div>
+
+        <div id="catSimple" class="radio-group">
+          <label class="radio-option"><input type="radio" name="catSimple" value="1" /><span>Électricité</span></label>
+          <label class="radio-option"><input type="radio" name="catSimple" value="2" /><span>Propreté</span></label>
+        </div>
+
+        <div id="catAdvanced" class="radio-group" style="display:none; margin-top:6px">
+          <label class="radio-option"><input type="radio" name="catAdvanced" value="1" /><span>Électricité</span></label>
+          <label class="radio-option"><input type="radio" name="catAdvanced" value="2" /><span>Propreté</span></label>
+          <label class="radio-option"><input type="radio" name="catAdvanced" value="3" /><span>Plomberie</span></label>
+          <label class="radio-option"><input type="radio" name="catAdvanced" value="4" /><span>Porte / Fenêtre</span></label>
+          <label class="radio-option"><input type="radio" name="catAdvanced" value="5" /><span>Consommable</span></label>
+          <label class="radio-option"><input type="radio" name="catAdvanced" value="6" /><span>Autre</span></label>
+        </div>
+
+        <div class="hint">
+          <button id="btnCatMore" class="toggle-link" type="button">+ de catégories</button>
+          <button id="btnCatLess" class="toggle-link" type="button" style="display:none">moins de catégories</button>
+        </div>
+      </section>
+
+      <!-- 4) Type d'incident
+      <section class="card">
+        <div class="card-title">
+          <span>Type d'incident</span>
+          <span class="subtitle">
+            <span class="section-label">Sélection</span>
+            <span class="pill-selected">Incident : <span id="incidentSelected" class="value">—</span></span>
+          </span>
+        </div>
+
+        <div id="incidentRadioGroup" class="radio-group incidents-list">
+          <div class="hint">
+            Choisissez d'abord une catégorie pour voir les propositions adaptées (disfonctionnement, fuite, nettoyage, etc.).
+          </div>
+        </div>
+      </section>
+ -->
+      <!-- 5) Informations complémentaires -->
+      <section class="card">
+        <div class="card-title"><span>Informations complémentaires</span></div>
+
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" placeholder="Exemple : fuite au plafond près de l'ascenseur, disfonctionnement d'une ampoule..."></textarea>
+          <small>Toutes précisions sont appréciées : localisation dans la zone, intensité du problème, depuis quand, etc.</small>
+        </div>
+
+        <div class="field">
+          <label for="photo">Photo</label>
+          <input id="photo" type="file" accept="image/*" />
+          <small>Ajouter une photo permet au gestionnaire d'évaluer plus vite.</small>
+        </div>
+
+        <div id="formError" class="error" style="display:none"></div>
+      </section>
+
+      <!-- 6) Contact -->
+      <section class="card">
+        <div class="card-title"><span>Contact</span></div>
+
+        <div class="field">
+          <label for="emailUser">Votre email</label>
+          <input id="emailUser" type="email" placeholder="vous@exemple.com" />
+          <small>Utilisé pour vous tenir informé du traitement de l'incident.</small>
+        </div>
+
+        <div class="field">
+          <label class="checkbox-inline">
+            <input id="anonymous" type="checkbox" />
+            <span>Je souhaite rester anonyme</span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label for="emailGest">Email du gestionnaire</label>
+          <input id="emailGest" type="email" placeholder="Gardien, régisseur, membre du conseil syndical, accueil..." />
+          <small>Si vous le connaissez, l'alerte lui sera envoyée directement.</small>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn-secondary" onclick="resetForm()">Réinitialiser</button>
+          <button type="button" class="btn-primary" onclick="submitForm()">Envoyer le signalement</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // --- Modèle de données (équivalent aux LOV APEX) ------------------------
+
+    const zoneLabels = {
+      1: "Hall",
+      2: "Couloir",
+      3: "Ascenseur",
+      4: "Escalier",
+      5: "Façade",
+      6: "Boîtes aux lettres",
+      7: "Local vélos",
+      8: "Local technique",
+      9: "Cour / Jardin",
+      10: "Autre"
+    };
+
+    const categorieLabels = {
+      1: "Électricité",
+      2: "Propreté",
+      3: "Plomberie",
+      4: "Porte / Fenêtre",
+      5: "Consommable",
+      6: "Autre"
+    };
+
+    const incidentByCategory = {
+      1: ["Disfonctionnement", "À inspecter", "Autre"],
+      2: ["Détritus", "Nettoyage demandé", "Autre"],
+      3: ["Fuite identifiée", "Disfonctionnement", "À inspecter", "Autre"],
+      4: ["Disfonctionnement", "À inspecter", "Autre"],
+      5: ["Commander", "Remplacement", "Vérifier le stock", "Vérifier le consommable (extincteur, pile, …)", "Autre"],
+      6: ["Autre"]
+    };
+
+    const floorLabelsMap = {
+      "-5": "3e sous-sol",
+      "-4": "2e sous-sol",
+      "-3": "1er sous-sol",
+      "-2": "Entresol",
+      "-1": "Mezzanine",
+      "0": "RDC / RDJ / RR",
+      "1": "1er étage",
+      "2": "2e étage",
+      "3": "3e étage",
+      "4": "4e étage",
+      "5": "5e étage",
+      "6": "6e étage",
+      "7": "7e étage"
+    };
+
+    const FLOOR_MIN = -4;
+    const FLOOR_MAX = 7;
+    let floorValue = 0;
+
+    let selectedZone = null;
+    let selectedCategorie = null;
+    let selectedIncident = null;
+
+    // Setters exposés pour pills.js (les variables top-level avec let ne sont pas sur window)
+    function setSelectedZone(val) {
+      selectedZone = val;
+      console.log('[setSelectedZone] selectedZone=', selectedZone);
+    }
+    function setSelectedCategorie(val) {
+      selectedCategorie = val;
+      console.log('[setSelectedCategorie] selectedCategorie=', selectedCategorie);
+    }
+
+    function updateZoneSelected(label) {
+      document.getElementById("zoneSelected").textContent = label || "—";
+    }
+
+    function updateCategorieSelected(label) {
+      console.log('[updateCategorieSelected] label=', label, 'selectedCategorie=', selectedCategorie);
+      document.getElementById("categorieSelected").textContent = label || "—";
+      selectedIncident = null;
+      document.getElementById("incidentSelected").textContent = "—";
+      renderIncidentRadios();
+    }
+
+    function updateIncidentSelected(label) {
+      document.getElementById("incidentSelected").textContent = label || "—";
+    }
+
+    function updateFloorLabel() {
+      const label = floorLabelsMap[String(floorValue)] || (floorValue + "e étage");
+      document.getElementById("floorLabel").textContent = label;
+    }
+
+    function clampFloor(v) {
+      return Math.max(FLOOR_MIN, Math.min(FLOOR_MAX, v));
+    }
+
+    function clearRadios(name) {
+      document.querySelectorAll('input[type="radio"][name="' + name + '"]').forEach((i) => (i.checked = false));
+    }
+
+    function handleZoneChange(event) {
+      const value = event.target.value;
+      selectedZone = parseInt(value, 10);
+      updateZoneSelected(zoneLabels[selectedZone] || "—");
+    }
+
+    function handleCategorieChange(event) {
+      const value = event.target.value;
+      const parsed = parseInt(value, 10);
+      selectedCategorie = parsed;
+      console.log('[handleCategorieChange] value=', value, 'parsed=', parsed, 'label=', categorieLabels[parsed]);
+      updateCategorieSelected(categorieLabels[selectedCategorie] || "—");
+    }
+
+    function renderIncidentRadios() {
+      const container = document.getElementById("incidentRadioGroup");
+      container.innerHTML = "";
+      console.log('[renderIncidentRadios] selectedCategorie=', selectedCategorie, 'hasList=', !!incidentByCategory[selectedCategorie]);
+
+      if (!selectedCategorie || !incidentByCategory[selectedCategorie]) {
+        console.warn('[renderIncidentRadios] missing or invalid selectedCategorie -> show hint');
+        container.innerHTML = '<div class="hint">Choisissez une catégorie pour afficher les types d\'incident correspondants.</div>';
+        return;
+      }
+
+      const list = incidentByCategory[selectedCategorie];
+      console.log('[renderIncidentRadios] list size=', list.length, 'list=', list);
+      const group = document.createElement("div");
+      group.className = "radio-group";
+
+      list.forEach((label, idx) => {
+        const id = "incident_" + selectedCategorie + "_" + idx;
+        const wrapper = document.createElement("label");
+        wrapper.className = "radio-option";
+
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "incident";
+        radio.id = id;
+        radio.value = label;
+
+        radio.addEventListener("change", () => {
+          selectedIncident = label;
+          console.log('[incident change] selectedIncident=', label);
+          updateIncidentSelected(label);
+        });
+
+        const span = document.createElement("span");
+        span.textContent = label;
+
+        wrapper.appendChild(radio);
+        wrapper.appendChild(span);
+        group.appendChild(wrapper);
+      });
+
+      container.appendChild(group);
+      console.log('[renderIncidentRadios] rendered group for category', selectedCategorie);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Zone – simple / avancé
+      document.getElementById("btnZoneMore").addEventListener("click", () => {
+        document.getElementById("zoneSimple").style.display = "none";
+        document.getElementById("zoneAdvanced").style.display = "flex";
+        document.getElementById("btnZoneMore").style.display = "none";
+        document.getElementById("btnZoneLess").style.display = "inline";
+        clearRadios("zoneSimple");
+        selectedZone = null;
+        updateZoneSelected("—");
+      });
+
+      document.getElementById("btnZoneLess").addEventListener("click", () => {
+        document.getElementById("zoneSimple").style.display = "flex";
+        document.getElementById("zoneAdvanced").style.display = "none";
+        document.getElementById("btnZoneMore").style.display = "inline";
+        document.getElementById("btnZoneLess").style.display = "none";
+        clearRadios("zoneAdvanced");
+        selectedZone = null;
+        updateZoneSelected("—");
+      });
+
+      document.querySelectorAll('input[name="zoneSimple"]').forEach((el) => el.addEventListener("change", handleZoneChange));
+      document.querySelectorAll('input[name="zoneAdvanced"]').forEach((el) => el.addEventListener("change", handleZoneChange));
+
+      // Catégorie – simple / avancé
+      document.getElementById("btnCatMore").addEventListener("click", () => {
+        document.getElementById("catSimple").style.display = "none";
+        document.getElementById("catAdvanced").style.display = "flex";
+        document.getElementById("btnCatMore").style.display = "none";
+        document.getElementById("btnCatLess").style.display = "inline";
+        clearRadios("catSimple");
+        selectedCategorie = null;
+        updateCategorieSelected("—");
+      });
+
+      document.getElementById("btnCatLess").addEventListener("click", () => {
+        document.getElementById("catSimple").style.display = "flex";
+        document.getElementById("catAdvanced").style.display = "none";
+        document.getElementById("btnCatMore").style.display = "inline";
+        document.getElementById("btnCatLess").style.display = "none";
+        clearRadios("catAdvanced");
+        selectedCategorie = null;
+        updateCategorieSelected("—");
+      });
+
+      document.querySelectorAll('input[name="catSimple"]').forEach((el) => el.addEventListener("change", handleCategorieChange));
+      document.querySelectorAll('input[name="catAdvanced"]').forEach((el) => el.addEventListener("change", handleCategorieChange));
+
+      // Etage +/-
+      document.getElementById("btnFloorMinus").addEventListener("click", () => {
+        floorValue = clampFloor(floorValue - 1);
+        updateFloorLabel();
+      });
+
+      document.getElementById("btnFloorPlus").addEventListener("click", () => {
+        floorValue = clampFloor(floorValue + 1);
+        updateFloorLabel();
+      });
+
+      // Init
+      updateFloorLabel();
+      renderIncidentRadios();
+    });
+
+    function showError(message) {
+      const el = document.getElementById("formError");
+      if (!message) {
+        el.style.display = "none";
+        el.textContent = "";
+        return;
+      }
+      el.textContent = message;
+      el.style.display = "block";
+    }
+
+    function submitForm() {
+      showError(null);
+
+      if (!selectedZone) { showError("Veuillez sélectionner une zone."); return; }
+      if (!selectedCategorie) { showError("Veuillez sélectionner une catégorie."); return; }
+      if (!selectedIncident) { showError("Veuillez choisir un type d'incident."); return; }
+
+      const description = document.getElementById("description").value;
+      const emailUser = document.getElementById("emailUser").value;
+      const emailGest = document.getElementById("emailGest").value;
+      const anonymous = document.getElementById("anonymous").checked;
+
+      const payload = {
+        zoneId: selectedZone,
+        zoneLabel: zoneLabels[selectedZone],
+        categorieId: selectedCategorie,
+        categorieLabel: categorieLabels[selectedCategorie],
+        incidentLabel: selectedIncident,
+        floorValue,
+        floorLabel: floorLabelsMap[String(floorValue)],
+        description,
+        emailUtilisateur: emailUser,
+        emailGestionnaire: emailGest,
+        anonyme: anonymous
+      };
+
+      console.log("Signalement envoyé (exemple) :", payload);
+      alert("Signalement préparé.\n(Regarde la console pour voir le payload JSON.)");
+    }
+
+    function resetForm() {
+      clearRadios("zoneSimple");
+      clearRadios("zoneAdvanced");
+      clearRadios("catSimple");
+      clearRadios("catAdvanced");
+      clearRadios("incident");
+
+      selectedZone = null;
+      selectedCategorie = null;
+      selectedIncident = null;
+      updateZoneSelected("—");
+      updateCategorieSelected("—");
+      updateIncidentSelected("—");
+
+      floorValue = 0;
+      updateFloorLabel();
+
+      document.getElementById("description").value = "";
+      document.getElementById("emailUser").value = "";
+      document.getElementById("emailGest").value = "";
+      document.getElementById("anonymous").checked = false;
+      document.getElementById("photo").value = "";
+
+      document.getElementById("zoneSimple").style.display = "flex";
+      document.getElementById("zoneAdvanced").style.display = "none";
+      document.getElementById("btnZoneMore").style.display = "inline";
+      document.getElementById("btnZoneLess").style.display = "none";
+
+      document.getElementById("catSimple").style.display = "flex";
+      document.getElementById("catAdvanced").style.display = "none";
+      document.getElementById("btnCatMore").style.display = "inline";
+      document.getElementById("btnCatLess").style.display = "none";
+
+      renderIncidentRadios();
+      showError(null);
+    }
+  </script>
+  <script src="pills.js"></script>
+</body>
+</html>
