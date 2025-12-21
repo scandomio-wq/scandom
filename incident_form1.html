@@ -185,6 +185,7 @@
     .floor-label { flex: 1; text-align: center; font-weight: 500; font-size: 0.95rem; }
 
     .floor-hint { font-size: 0.8rem; color: var(--text-soft); margin-top: 4px; }
+    .required-field::after { content: "*"; color: var(--danger); margin-left: 4px; }
 
     .field { margin-bottom: 10px; }
 
@@ -267,11 +268,11 @@
     <main class="layout">
       <!-- 1) Étage / niveau -->
       <section class="card">
-        <div class="card-title"><span>Étage / niveau</span></div>
+        <div class="card-title"><span class="required-field">Étage / niveau</span></div>
 
         <div class="floor-control">
           <button id="btnFloorMinus" type="button" class="btn-ghost">−</button>
-          <div id="floorLabel" class="floor-label">RDC / RDJ / RR</div>
+          <div id="floorLabel" class="floor-label">—</div>
           <button id="btnFloorPlus" type="button" class="btn-ghost">+</button>
         </div>
         <div class="floor-hint">Plage autorisée : du 2e sous-sol à 7e étage.</div>
@@ -280,7 +281,7 @@
       <!-- 2) Zone de l'incident -->
       <section class="card">
         <div class="card-title">
-          <span>Zone de l'incident</span>
+          <span class="required-field">Zone de l'incident</span>
           <span class="subtitle">
             <span class="section-label">Zone sélectionnée</span>
             <span class="pill-selected">Zone : <span id="zoneSelected" class="value">—</span></span>
@@ -352,7 +353,7 @@
       <!-- 3) Catégorie -->
       <section class="card">
         <div class="card-title">
-          <span>Catégorie</span>
+          <span class="required-field">Catégorie</span>
           <span class="subtitle">
             <span class="section-label">Catégorie sélectionnée</span>
             <span class="pill-selected">Catégorie : <span id="categorieSelected" class="value">—</span></span>
@@ -379,23 +380,6 @@
         </div>
       </section>
 
-      <!-- 4) Type d'incident
-      <section class="card">
-        <div class="card-title">
-          <span>Type d'incident</span>
-          <span class="subtitle">
-            <span class="section-label">Sélection</span>
-            <span class="pill-selected">Incident : <span id="incidentSelected" class="value">—</span></span>
-          </span>
-        </div>
-
-        <div id="incidentRadioGroup" class="radio-group incidents-list">
-          <div class="hint">
-            Choisissez d'abord une catégorie pour voir les propositions adaptées (disfonctionnement, fuite, nettoyage, etc.).
-          </div>
-        </div>
-      </section>
- -->
       <!-- 5) Informations complémentaires -->
       <section class="card">
         <div class="card-title"><span>Informations complémentaires</span></div>
@@ -420,8 +404,8 @@
         <div class="card-title"><span>Contact</span></div>
 
         <div class="field">
-          <label for="emailUser">Votre email</label>
-          <input id="emailUser" type="email" placeholder="vous@exemple.com" />
+          <label for="emailUser" class="required-field">Votre email</label>
+          <input id="emailUser" type="email" placeholder="vous@exemple.com" required />
           <small>Utilisé pour vous tenir informé du traitement de l'incident.</small>
         </div>
 
@@ -471,15 +455,6 @@
       6: "Autre"
     };
 
-    const incidentByCategory = {
-      1: ["Disfonctionnement", "À inspecter", "Autre"],
-      2: ["Détritus", "Nettoyage demandé", "Autre"],
-      3: ["Fuite identifiée", "Disfonctionnement", "À inspecter", "Autre"],
-      4: ["Disfonctionnement", "À inspecter", "Autre"],
-      5: ["Commander", "Remplacement", "Vérifier le stock", "Vérifier le consommable (extincteur, pile, …)", "Autre"],
-      6: ["Autre"]
-    };
-
     const floorLabelsMap = {
       "-5": "3e sous-sol",
       "-4": "2e sous-sol",
@@ -498,11 +473,10 @@
 
     const FLOOR_MIN = -4;
     const FLOOR_MAX = 7;
-    let floorValue = 0;
+    let floorValue = null;
 
     let selectedZone = null;
     let selectedCategorie = null;
-    let selectedIncident = null;
 
     // Setters exposés pour pills.js (les variables top-level avec let ne sont pas sur window)
     function setSelectedZone(val) {
@@ -521,17 +495,10 @@
     function updateCategorieSelected(label) {
       console.log('[updateCategorieSelected] label=', label, 'selectedCategorie=', selectedCategorie);
       document.getElementById("categorieSelected").textContent = label || "—";
-      selectedIncident = null;
-      document.getElementById("incidentSelected").textContent = "—";
-      renderIncidentRadios();
-    }
-
-    function updateIncidentSelected(label) {
-      document.getElementById("incidentSelected").textContent = label || "—";
     }
 
     function updateFloorLabel() {
-      const label = floorLabelsMap[String(floorValue)] || (floorValue + "e étage");
+      const label = floorValue !== null ? (floorLabelsMap[String(floorValue)] || (floorValue + "e étage")) : "—";
       document.getElementById("floorLabel").textContent = label;
     }
 
@@ -557,52 +524,9 @@
       updateCategorieSelected(categorieLabels[selectedCategorie] || "—");
     }
 
-    function renderIncidentRadios() {
-      const container = document.getElementById("incidentRadioGroup");
-      container.innerHTML = "";
-      console.log('[renderIncidentRadios] selectedCategorie=', selectedCategorie, 'hasList=', !!incidentByCategory[selectedCategorie]);
-
-      if (!selectedCategorie || !incidentByCategory[selectedCategorie]) {
-        console.warn('[renderIncidentRadios] missing or invalid selectedCategorie -> show hint');
-        container.innerHTML = '<div class="hint">Choisissez une catégorie pour afficher les types d\'incident correspondants.</div>';
-        return;
-      }
-
-      const list = incidentByCategory[selectedCategorie];
-      console.log('[renderIncidentRadios] list size=', list.length, 'list=', list);
-      const group = document.createElement("div");
-      group.className = "radio-group";
-
-      list.forEach((label, idx) => {
-        const id = "incident_" + selectedCategorie + "_" + idx;
-        const wrapper = document.createElement("label");
-        wrapper.className = "radio-option";
-
-        const radio = document.createElement("input");
-        radio.type = "radio";
-        radio.name = "incident";
-        radio.id = id;
-        radio.value = label;
-
-        radio.addEventListener("change", () => {
-          selectedIncident = label;
-          console.log('[incident change] selectedIncident=', label);
-          updateIncidentSelected(label);
-        });
-
-        const span = document.createElement("span");
-        span.textContent = label;
-
-        wrapper.appendChild(radio);
-        wrapper.appendChild(span);
-        group.appendChild(wrapper);
-      });
-
-      container.appendChild(group);
-      console.log('[renderIncidentRadios] rendered group for category', selectedCategorie);
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
+      // Réinitialisation du formulaire au chargement
+      resetForm();
       // Zone – simple / avancé
       document.getElementById("btnZoneMore").addEventListener("click", () => {
         document.getElementById("zoneSimple").style.display = "none";
@@ -653,18 +577,19 @@
 
       // Etage +/-
       document.getElementById("btnFloorMinus").addEventListener("click", () => {
-        floorValue = clampFloor(floorValue - 1);
+        floorValue = floorValue === null ? 0 : floorValue - 1;
+        floorValue = clampFloor(floorValue);
         updateFloorLabel();
       });
 
       document.getElementById("btnFloorPlus").addEventListener("click", () => {
-        floorValue = clampFloor(floorValue + 1);
+        floorValue = floorValue === null ? 0 : floorValue + 1;
+        floorValue = clampFloor(floorValue);
         updateFloorLabel();
       });
 
       // Init
       updateFloorLabel();
-      renderIncidentRadios();
     });
 
     function showError(message) {
@@ -683,7 +608,7 @@
 
       if (!selectedZone) { showError("Veuillez sélectionner une zone."); return; }
       if (!selectedCategorie) { showError("Veuillez sélectionner une catégorie."); return; }
-      if (!selectedIncident) { showError("Veuillez choisir un type d'incident."); return; }
+      if (floorValue === null) { showError("Veuillez sélectionner un étage/niveau."); return; }
 
       const description = document.getElementById("description").value;
       const emailUser = document.getElementById("emailUser").value;
@@ -695,9 +620,8 @@
         zoneLabel: zoneLabels[selectedZone],
         categorieId: selectedCategorie,
         categorieLabel: categorieLabels[selectedCategorie],
-        incidentLabel: selectedIncident,
         floorValue,
-        floorLabel: floorLabelsMap[String(floorValue)],
+        floorLabel: floorValue === null ? null : floorLabelsMap[String(floorValue)],
         description,
         emailUtilisateur: emailUser,
         emailGestionnaire: emailGest,
@@ -713,16 +637,13 @@
       clearRadios("zoneAdvanced");
       clearRadios("catSimple");
       clearRadios("catAdvanced");
-      clearRadios("incident");
 
       selectedZone = null;
       selectedCategorie = null;
-      selectedIncident = null;
       updateZoneSelected("—");
       updateCategorieSelected("—");
-      updateIncidentSelected("—");
 
-      floorValue = 0;
+      floorValue = null;
       updateFloorLabel();
 
       document.getElementById("description").value = "";
@@ -740,8 +661,6 @@
       document.getElementById("catAdvanced").style.display = "none";
       document.getElementById("btnCatMore").style.display = "inline";
       document.getElementById("btnCatLess").style.display = "none";
-
-      renderIncidentRadios();
       showError(null);
     }
   </script>

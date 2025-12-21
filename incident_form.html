@@ -688,6 +688,7 @@
       if (!selectedZone) { showError("Veuillez sélectionner une zone."); return; }
       if (!selectedCategorie) { showError("Veuillez sélectionner une catégorie."); return; }
       if (!selectedIncident) { showError("Veuillez choisir un type d'incident."); return; }
+      if (floorValue === null || floorValue === undefined || isNaN(floorValue)) { showError("Veuillez sélectionner un étage/niveau."); return; }
 
       const description = document.getElementById("description").value;
       const emailUser = document.getElementById("emailUser").value;
