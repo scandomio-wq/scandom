@@ -18,6 +18,7 @@
     'Porte / Fenêtre': '🪟',
     'Consommable': '📦'
   };
+  
 
   function buildPills(containerId, groupName, onSelect){
     const root = document.getElementById(containerId);
