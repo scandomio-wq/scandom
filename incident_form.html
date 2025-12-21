@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  
   <title>ScanDom – Signalement d'incident</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/heroicons/2.0.18/heroicons.min.css" />
@@ -687,6 +688,7 @@
       if (!selectedZone) { showError("Veuillez sélectionner une zone."); return; }
       if (!selectedCategorie) { showError("Veuillez sélectionner une catégorie."); return; }
       if (!selectedIncident) { showError("Veuillez choisir un type d'incident."); return; }
+      if (floorValue === null || floorValue === undefined || isNaN(floorValue)) { showError("Veuillez sélectionner un étage/niveau."); return; }
 
       const description = document.getElementById("description").value;
       const emailUser = document.getElementById("emailUser").value;

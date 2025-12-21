@@ -18,6 +18,7 @@
     'Porte / Fenêtre': '🪟',
     'Consommable': '📦'
   };
+  
 
   function buildPills(containerId, groupName, onSelect){
     const root = document.getElementById(containerId);
@@ -206,17 +207,7 @@
     mirrorToggle('btnCatMore','catAdvanced','catSimple');
     mirrorToggle('btnCatLess','catSimple','catAdvanced');
 
-    // If no category selected, auto-select the first visible category pill to populate incidents
-    try {
-      const visibleCatPillsContainer = (cSimple && cSimple.style.display !== 'none') ? cSimple : (cAdv && cAdv.style.display !== 'none') ? cAdv : (cSimple || cAdv);
-      if (visibleCatPillsContainer) {
-        const firstCatPill = visibleCatPillsContainer.querySelector('.pill[data-group="catSimple"], .pill[data-group="catAdvanced"]');
-        if (firstCatPill && !document.querySelector('.pill.selected[data-group="catSimple"], .pill.selected[data-group="catAdvanced"]')) {
-          console.log('[pills.js] auto-select first category pill');
-          firstCatPill.click();
-        }
-      }
-    } catch(e) { /* noop */ }
+    // Keep categories unselected on load; user must explicitly choose.
 
     // Wrap resetForm if present to also clear pills
     if(typeof window.resetForm === 'function'){
