@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Imprimer un QR Code</title>
+  <style>
+    :root {
+      --pink: #ff4f70;
+      --pink-soft: #ff7a88;
+      --violet: #8b5cf6;
+      --primary: #ffffff;
+      --text-main: #111827;
+      --text-soft: #6b7280;
+      --bg-card: #ffffff;
+      --border: #e5e7eb;
+      --shadow: 0 10px 30px rgba(17, 24, 39, 0.15);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-main);
+      background: #f9fafb;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--primary);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .topbar-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .topbar-title strong {
+      font-size: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    .topbar-title span {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--primary);
+      color: var(--text-main);
+      padding: 9px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--pink) 0%, var(--violet) 100%);
+      color: #ffffff;
+    }
+
+    .btn-ghost {
+      background: transparent;
+    }
+
+    .content {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .card p {
+      margin: 0 0 14px;
+      color: var(--text-soft);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    .help {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-soft);
+      line-height: 1.4;
+    }
+
+    .preview-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .preview {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .preview-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 79, 112, 0.12);
+      color: #db2777;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .preview-date {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .preview-body {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .qr-box {
+      width: 210px;
+      height: 210px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      margin: 0 auto;
+    }
+
+    .qr-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .preview-title {
+      font-size: 14px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .preview-sub {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .preview-notes {
+      text-align: left;
+      font-size: 12px;
+      color: var(--text-main);
+      border-top: 1px dashed var(--border);
+      padding-top: 10px;
+      white-space: pre-wrap;
+    }
+
+    .muted {
+      color: var(--text-soft);
+    }
+
+    @media (max-width: 900px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body { background: #ffffff; }
+      .topbar, .content { display: none; }
+      .print-page { display: block; }
+    }
+
+    .print-page {
+      display: none;
+      width: 210mm;
+      height: 297mm;
+      padding: 18mm;
+      margin: 0 auto;
+      background: #fff;
+      color: #111827;
+      position: relative;
+    }
+
+    .print-title {
+      display: inline-block;
+      padding: 6px 18px;
+      background: #ec4899;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 6px;
+    }
+
+    .print-subtitle {
+      margin-top: 12mm;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #4b5563;
+      text-align: center;
+    }
+
+    .print-body {
+      text-align: center;
+      margin-top: 10mm;
+    }
+
+    .print-qr-box {
+      width: 50mm;
+      height: 50mm;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4mm;
+      margin-top: 8mm;
+    }
+
+    .print-qr-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .print-notes {
+      margin-top: 10mm;
+      font-size: 11px;
+      text-align: left;
+      white-space: pre-wrap;
+      border-top: 1px dashed #e5e7eb;
+      padding-top: 6mm;
+    }
+
+    .print-footer {
+      position: absolute;
+      left: 18mm;
+      right: 18mm;
+      bottom: 16mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #9ca3af;
+    }
+
+    .print-footer-logo {
+      font-weight: 600;
+      color: #111827;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="topbar-title">
+        <strong>Imprimer un QR Code</strong>
+        <span>Pour créer votre affiche QR Code, identifiez le bâtiment et le gestionnaire.</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" type="button" id="closeModalBtn">Fermer</button>
+        <button class="btn btn-primary" type="button" id="printBtn">Imprimer</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <section class="card">
+        <h2>Informations</h2>
+        <p>Ces informations seront utilisées pour générer la fiche imprimable et préparer les notifications.</p>
+
+        <div class="grid">
+          <div class="field">
+            <label for="addr">Adresse</label>
+            <input id="addr" type="text" placeholder="10, avenue de la république 75011 Paris" />
+            <div class="help">Identifiez le bâtiment. Cette adresse apparaîtra sur la fiche.</div>
+          </div>
+
+          <div class="field">
+            <label for="libelle">Libellé (facultatif)</label>
+            <input id="libelle" type="text" placeholder="Exemple: nom du batiment" />
+            <div class="help">Choisissez un nom de bâtiment à afficher. Il apparaîtra en-dessous de l’adresse.</div>
+          </div>
+
+          <div class="field">
+            <label for="emailGest">Email du gestionnaire</label>
+            <input id="emailGest" type="email" placeholder="Gardien, régisseur, conseil syndical, accueil…" />
+            <div class="help">Le gestionnaire recevra les notifications d’incidents sur l’adresse email renseignée.</div>
+          </div>
+
+          <div class="field">
+            <label for="notes">Notes additionnelles</label>
+            <textarea id="notes" placeholder="Les jours de marché ont lieu le mardi et le jeudi"></textarea>
+            <div class="help">Ajoutez des notes additionnelles à afficher en bas de la fiche.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card preview-wrap">
+        <div>
+          <h2>Aperçu</h2>
+          <p>L’aperçu se met à jour automatiquement. Utilisez “Imprimer” pour obtenir la fiche.</p>
+        </div>
+
+        <div class="preview" id="preview">
+          <div class="preview-header">
+            <div class="preview-badge">ScanDom.io</div>
+            <div class="preview-date" id="previewDate">—</div>
+          </div>
+
+          <div class="preview-body">
+            <div class="qr-box">
+              <img id="qrImg" alt="QR Code" />
+            </div>
+            <p class="preview-title" id="previewLine1">Scannez pour signaler un incident</p>
+            <p class="preview-sub" id="previewLine2">—</p>
+            <div class="preview-notes" id="previewNotes"></div>
+            <p class="muted" style="margin: 0; font-size: 11px;">QR → formulaire de signalement</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="print-page" id="printPage">
+      <div style="text-align:center;">
+        <span class="print-title">ScanDom</span>
+      </div>
+      <div class="print-subtitle" id="printSubtitle">—</div>
+      <div class="print-body">
+        <div class="print-qr-box">
+          <img id="printQrImg" alt="QR Code" />
+        </div>
+        <div style="margin-top: 8mm; font-size: 13px; color:#111827;">
+          Scannez ce QR code pour signaler un incident.
+        </div>
+        <div class="print-notes" id="printNotes"></div>
+      </div>
+      <div class="print-footer">
+        <span class="print-footer-logo">ScanDom.io</span>
+        <span id="printDate">—</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const addrEl = document.getElementById('addr');
+      const libelleEl = document.getElementById('libelle');
+      const emailGestEl = document.getElementById('emailGest');
+      const notesEl = document.getElementById('notes');
+
+      const previewDateEl = document.getElementById('previewDate');
+      const previewLine2El = document.getElementById('previewLine2');
+      const previewNotesEl = document.getElementById('previewNotes');
+
+      const qrImg = document.getElementById('qrImg');
+      const printQrImg = document.getElementById('printQrImg');
+
+      const printSubtitleEl = document.getElementById('printSubtitle');
+      const printNotesEl = document.getElementById('printNotes');
+      const printDateEl = document.getElementById('printDate');
+
+      function nowLabel() {
+        const d = new Date();
+        return d.toLocaleString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      }
+
+      function buildTargetUrl() {
+        const base = new URL('incident_form1.html', window.location.href);
+        const params = new URLSearchParams();
+
+        const addr = addrEl.value.trim();
+        const libelle = libelleEl.value.trim();
+        const emailGest = emailGestEl.value.trim();
+        const notes = notesEl.value.trim();
+
+        if (addr) params.set('adresse', addr);
+        if (libelle) params.set('libelle', libelle);
+        if (emailGest) params.set('emailGest', emailGest);
+        if (notes) params.set('notes', notes);
+
+        base.search = params.toString();
+        return base.toString();
+      }
+
+      function updateView() {
+        const addr = addrEl.value.trim();
+        const libelle = libelleEl.value.trim();
+        const notes = notesEl.value.trim();
+
+        const subtitle = [libelle || null, addr || null].filter(Boolean).join(' · ') || '—';
+
+        previewDateEl.textContent = nowLabel();
+        previewLine2El.textContent = subtitle;
+        previewNotesEl.textContent = notes ? notes : '';
+
+        printSubtitleEl.textContent = subtitle;
+        printNotesEl.textContent = notes ? ('Notes :\n' + notes) : '';
+        printDateEl.textContent = nowLabel();
+
+        const targetUrl = buildTargetUrl();
+        const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=420x420&data=' + encodeURIComponent(targetUrl);
+        qrImg.src = qrUrl;
+        printQrImg.src = qrUrl;
+      }
+
+      function closeModal() {
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'closePrintModal' }, '*');
+            return;
+          }
+        } catch (e) {}
+        window.close();
+      }
+
+      document.getElementById('printBtn').addEventListener('click', function () {
+        updateView();
+        window.print();
+      });
+
+      document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+
+      [addrEl, libelleEl, emailGestEl, notesEl].forEach((el) => {
+        el.addEventListener('input', updateView);
+      });
+
+      updateView();
+
+      window.addEventListener('message', function (event) {
+        if (!event || !event.data) return;
+        if (event.data.type === 'setPrintQrData') {
+          if (typeof event.data.addr === 'string') addrEl.value = event.data.addr;
+          if (typeof event.data.libelle === 'string') libelleEl.value = event.data.libelle;
+          if (typeof event.data.emailGest === 'string') emailGestEl.value = event.data.emailGest;
+          if (typeof event.data.notes === 'string') notesEl.value = event.data.notes;
+          updateView();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

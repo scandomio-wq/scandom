@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imprimer la fiche - ScanDom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+            --bg-color: #f9fafb;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .print-section {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .print-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .print-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .print-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .qr-code-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            min-height: 300px;
+        }
+
+        .qr-code-placeholder {
+            width: 200px;
+            height: 200px;
+            background-color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .details-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--text-color);
+            padding: 8px 12px;
+            background-color: #f9fafb;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .instructions {
+            background-color: #f0f9ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 16px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+
+        .instructions h4 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .print-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            background-color: #f9fafb;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-outline:hover {
+            background-color: #f3f4f6;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-section, .print-section * {
+                visibility: visible;
+            }
+            .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+            }
+            .print-actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay" id="printModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Imprimer la fiche</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="print-section">
+                    <div class="print-header">
+                        <h2>Fiche de signalement</h2>
+                        <p>Utilisez cette fiche pour signaler rapidement un incident</p>
+                    </div>
+                    
+                    <div class="print-content">
+                        <div class="qr-code-container">
+                            <div class="qr-code-placeholder">
+                                QR Code généré
+                            </div>
+                            <p>Scannez ce code pour signaler un incident</p>
+                        </div>
+                        
+                        <div class="details-container">
+                            <div class="detail-item">
+                                <span class="detail-label">Bâtiment</span>
+                                <div class="detail-value" id="buildingName">[Nom du bâtiment]</div>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Étage</span>
+                                <div class="detail-value" id="floorLevel">[Niveau]</div>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Zone</span>
+                                <div class="detail-value" id="zoneName">[Nom de la zone]</div>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Date de génération</span>
+                                <div class="detail-value" id="generationDate">[Date]</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="instructions">
+                        <h4>Instructions :</h4>
+                        <ol>
+                            <li>Imprimez cette fiche et placez-la à un endroit visible dans la zone concernée.</li>
+                            <li>Pour signaler un incident, scannez le code QR avec votre appareil mobile.</li>
+                            <li>Suivez les instructions à l'écran pour compléter votre signalement.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="print-actions">
+                <button class="btn btn-outline" id="cancelPrint">Annuler</button>
+                <button class="btn btn-primary" id="printBtn">
+                    <i class="fas fa-print"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remplir les données dynamiques
+            const today = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            
+            document.getElementById('generationDate').textContent = today.toLocaleDateString('fr-FR', options);
+            
+            // Gestion des événements
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('cancelPrint').addEventListener('click', closeModal);
+            document.getElementById('printBtn').addEventListener('click', printDocument);
+            
+            // Fermer la modale en cliquant en dehors
+            document.getElementById('printModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+            
+            // Fonction pour fermer la modale
+            function closeModal() {
+                // Retourner à la page précédente ou masquer la modale
+                window.history.back();
+            }
+            
+            // Fonction pour imprimer le document
+            function printDocument() {
+                window.print();
+            }
+            
+            // Fonction pour mettre à jour les données dynamiques (à appeler depuis la page parente)
+            window.updatePrintData = function(data) {
+                if (data.buildingName) document.getElementById('buildingName').textContent = data.buildingName;
+                if (data.floorLevel) document.getElementById('floorLevel').textContent = data.floorLevel;
+                if (data.zoneName) document.getElementById('zoneName').textContent = data.zoneName;
+                
+                // Mettre à jour le QR code si nécessaire
+                if (data.qrCodeUrl) {
+                    const qrContainer = document.querySelector('.qr-code-placeholder');
+                    qrContainer.innerHTML = `<img src="${data.qrCodeUrl}" alt="QR Code" style="width: 100%; height: 100%; object-fit: contain;">`;
+                }
+            };
+            
+            // Exposer la fonction pour fermer la modale
+            window.closePrintModal = closeModal;
+        });
+    </script>
+</body>
+</html>
