@@ -420,6 +420,62 @@
       color: #111827;
     }
 
+    .print-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 9999;
+    }
+
+    .print-modal-overlay.is-open {
+      display: flex;
+    }
+
+    .print-modal {
+      width: min(980px, 96vw);
+      height: min(760px, 92vh);
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .print-modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      background: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      font-size: 22px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111827;
+      z-index: 1;
+    }
+
+    .print-modal-close:hover {
+      background: #ffffff;
+    }
+
+    .print-modal-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
     /* PRINT */
 
     @media print {
@@ -456,7 +512,7 @@
 
         <h1 class="hero-title">
           Avec ScanDom.io,<br>
-          <span class="accent">un scan suffit pour signaler.</span>
+          <span class="accent">un scan suffit pour signaler un incident dans votre bâtiment.</span>
         </h1>
 
         <p class="hero-sub">
@@ -466,7 +522,7 @@
         </p>
 
         <div class="hero-actions">
-          <button class="btn-primary" type="button" onclick="window.print()">
+          <button class="btn-primary" type="button" id="openPrintModal">
             🖨️ Imprimer la fiche&nbsp;QR
           </button>
           <div class="hero-caption">
@@ -526,6 +582,65 @@
       </aside>
     </main>
   </div>
+
+  <div id="printModalOverlay" class="print-modal-overlay" aria-hidden="true">
+    <div class="print-modal" role="dialog" aria-modal="true" aria-label="Imprimer un QR Code">
+      <button type="button" class="print-modal-close" id="printModalClose" aria-label="Fermer">&times;</button>
+      <iframe class="print-modal-frame" id="printModalFrame" title="Imprimer un QR Code"></iframe>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const openBtn = document.getElementById('openPrintModal');
+      const overlay = document.getElementById('printModalOverlay');
+      const closeBtn = document.getElementById('printModalClose');
+      const frame = document.getElementById('printModalFrame');
+
+      function openModal() {
+        if (!overlay || !frame) return;
+        frame.src = 'modal_print_qr.html';
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        if (!overlay || !frame) return;
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        frame.src = '';
+      }
+
+      if (openBtn) {
+        openBtn.addEventListener('click', openModal);
+      }
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+      }
+
+      if (overlay) {
+        overlay.addEventListener('click', function (e) {
+          if (e.target === overlay) closeModal();
+        });
+      }
+
+      window.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay && overlay.classList.contains('is-open')) {
+          closeModal();
+        }
+      });
+
+      window.addEventListener('message', function (event) {
+        if (!event || !event.data) return;
+        if (event.data.type === 'closePrintModal') {
+          closeModal();
+        }
+      });
+    })();
+  </script>
 
 </body>
 </html>
