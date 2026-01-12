@@ -446,29 +446,6 @@
       overflow: hidden;
     }
 
-    .print-modal-close {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      border: 1px solid rgba(229, 231, 235, 0.9);
-      background: rgba(255, 255, 255, 0.9);
-      cursor: pointer;
-      font-size: 22px;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #111827;
-      z-index: 1;
-    }
-
-    .print-modal-close:hover {
-      background: #ffffff;
-    }
-
     .print-modal-frame {
       width: 100%;
       height: 100%;
@@ -585,7 +562,6 @@
 
   <div id="printModalOverlay" class="print-modal-overlay" aria-hidden="true">
     <div class="print-modal" role="dialog" aria-modal="true" aria-label="Imprimer un QR Code">
-      <button type="button" class="print-modal-close" id="printModalClose" aria-label="Fermer">&times;</button>
       <iframe class="print-modal-frame" id="printModalFrame" title="Imprimer un QR Code"></iframe>
     </div>
   </div>
@@ -594,7 +570,6 @@
     (function () {
       const openBtn = document.getElementById('openPrintModal');
       const overlay = document.getElementById('printModalOverlay');
-      const closeBtn = document.getElementById('printModalClose');
       const frame = document.getElementById('printModalFrame');
 
       function openModal() {
@@ -615,10 +590,6 @@
 
       if (openBtn) {
         openBtn.addEventListener('click', openModal);
-      }
-
-      if (closeBtn) {
-        closeBtn.addEventListener('click', closeModal);
       }
 
       if (overlay) {
