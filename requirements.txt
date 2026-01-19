@@ -1,0 +1,6 @@
+psycopg2>=2.9.0
+qrcode>=7.3.1
+jsonschema>=4.0.0
+Pillow>=9.0.0  # Dépendance pour qrcode
+pytest>=7.0.0  # Pour les tests
+pytest-cov>=4.0.0  # Pour la couverture de code

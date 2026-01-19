@@ -1,0 +1,12 @@
+[postgresql]
+host = localhost
+port = 5432
+database = scandom
+user = postgres
+password = your_password_here
+
+[application]
+qr_code_prefix = QR
+qr_resolution = 1200
+qr_error_correction = M
+max_json_size = 1048576  # 1 Mo en octets
