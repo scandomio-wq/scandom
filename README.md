@@ -1,13 +1,14 @@
 # QR Building Registry
 
-Application pour stocker des informations sur des immeubles dans une base de données PostgreSQL et générer des QR codes uniques liés à ces immeubles.
+Application pour stocker des informations sur des immeubles dans une base de données PostgreSQL, gérer des incidents et générer des QR codes uniques.
 
 ## Fonctionnalités
 
 - Enregistrement d'immeubles avec leurs informations (emplacement, email du gestionnaire, notes)
-- Génération automatique d'identifiants QR uniques
+- Gestion des incidents liés aux immeubles (localisation, type, catégorie)
+- Génération automatique d'identifiants QR uniques pour les immeubles et les incidents
 - Génération de QR codes au format PNG
-- Recherche d'immeubles par identifiant QR
+- Recherche d'immeubles et d'incidents par identifiant QR
 - Interface en ligne de commande (CLI)
 
 ## Prérequis
@@ -87,9 +88,43 @@ Exemple :
 python src/cli/find_building.py QR1234567890 --format json
 ```
 
+### Importer un incident
+
+```bash
+python src/cli/import_incident.py <chemin_fichier_json> [--output <dossier_sortie>]
+```
+
+Exemple :
+```bash
+python src/cli/import_incident.py examples/incident_complete.json
+```
+
+### Générer un QR code pour un incident existant
+
+```bash
+python src/cli/generate_incident_qr.py (--id <id_incident> | --qr <qr_code_number>) [--output <dossier_sortie>] [--force]
+```
+
+Exemples :
+```bash
+python src/cli/generate_incident_qr.py --id 1
+python src/cli/generate_incident_qr.py --qr IN1234567890 --force
+```
+
+### Rechercher un incident par QR code
+
+```bash
+python src/cli/find_incident.py <qr_code_number> [--format json|text]
+```
+
+Exemple :
+```bash
+python src/cli/find_incident.py IN1234567890 --format json
+```
+
 ## Format des données
 
-### Fichier JSON d'entrée
+### Fichier JSON pour les immeubles
 
 ```json
 {
@@ -100,6 +135,25 @@ python src/cli/find_building.py QR1234567890 --format json
 ```
 
 Seul le champ `LOCATION` est obligatoire.
+
+### Fichier JSON pour les incidents
+
+```json
+{
+  "BUILDING_ID": 1,
+  "REPORTER_PHONE": "+33123456789",
+  "REPORTER_EMAIL": "reporter@example.com",
+  "INCIDENT_INFORMATION": {
+    "zone": "Escalier principal",
+    "etage": "3ème",
+    "categorie": "Plomberie",
+    "type": "Fuite d'eau",
+    "informations_supplementaires": "Fuite importante au niveau du palier."
+  }
+}
+```
+
+Les champs `BUILDING_ID` et `INCIDENT_INFORMATION` sont obligatoires. Dans `INCIDENT_INFORMATION`, les champs `zone`, `etage`, `categorie` et `type` sont obligatoires.
 
 ## Codes d'erreur
 
@@ -135,28 +189,39 @@ Voir le fichier [docs/performance.md](docs/performance.md) pour plus d'informati
 scandom/
 ├── src/
 │   ├── models/
-│   │   └── building.py       # Modèle de données pour les immeubles
+│   │   ├── building.py       # Modèle de données pour les immeubles
+│   │   └── incident.py       # Modèle de données pour les incidents
 │   ├── db/
 │   │   ├── __init__.py
 │   │   ├── connection.py     # Gestion de la connexion à PostgreSQL
-│   │   └── building_dao.py   # Opérations CRUD pour les immeubles
+│   │   ├── building_dao.py   # Opérations CRUD pour les immeubles
+│   │   └── incident_dao.py   # Opérations CRUD pour les incidents
 │   ├── qr/
 │   │   ├── __init__.py
 │   │   └── generator.py      # Logique de génération des QR codes
 │   ├── utils/
 │   │   ├── __init__.py
 │   │   ├── config.py         # Configuration de l'application
-│   │   └── validators.py     # Validation des données d'entrée
+│   │   ├── validators.py     # Validation des données d'entrée
+│   │   └── schemas/          # Schémas de validation JSON
+│   │       └── incident_schema.py # Schéma pour les incidents
 │   └── cli/
 │       ├── __init__.py
 │       ├── import_building.py # CLI pour importer un immeuble depuis JSON
-│       ├── generate_qr.py     # CLI pour générer un QR code
-│       └── find_building.py   # CLI pour rechercher un bâtiment par QR
+│       ├── generate_qr.py     # CLI pour générer un QR code pour un immeuble
+│       ├── find_building.py   # CLI pour rechercher un immeuble par QR
+│       ├── import_incident.py # CLI pour importer un incident depuis JSON
+│       ├── generate_incident_qr.py # CLI pour générer un QR code pour un incident
+│       └── find_incident.py   # CLI pour rechercher un incident par QR
 ├── migrations/
-│   └── 001_create_building_table.sql  # Script de création de la table T_BUILDING
+│   ├── 001_create_building_table.sql  # Script de création de la table T_BUILDING
+│   └── 002_create_incident_table.sql  # Script de création de la table T_INCIDENT
 ├── examples/                 # Exemples de fichiers JSON
+│   ├── building_*.json       # Exemples pour les immeubles
+│   └── incident_*.json       # Exemples pour les incidents
 ├── tests/
-│   ├── test_building_dao.py  # Tests pour les opérations CRUD
+│   ├── test_building_dao.py  # Tests pour les opérations CRUD des immeubles
+│   ├── test_incident_dao.py  # Tests pour les opérations CRUD des incidents
 │   ├── test_qr_generator.py  # Tests pour la génération de QR codes
 │   └── test_cli.py           # Tests pour les commandes CLI
 ├── config/

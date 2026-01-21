@@ -1,0 +1,12 @@
+{
+  "BUILDING_QR_CODE": "QR5050332870",
+  "REPORTER_PHONE": "+33123456789",
+  "REPORTER_EMAIL": "reporter@example.com",
+  "INCIDENT_INFORMATION": {
+    "zone": "Escalier principal",
+    "etage": "3ème",
+    "categorie": "Plomberie",
+    "type": "Fuite d'eau",
+    "informations_supplementaires": "Fuite importante au niveau du palier, eau qui s'écoule vers les étages inférieurs. Urgence d'intervention requise."
+  }
+}

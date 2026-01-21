@@ -56,8 +56,12 @@ class QRCodeGenerator:
             ValueError: Si l'identifiant QR est invalide.
             OSError: Si le dossier de sortie n'existe pas ou n'est pas accessible.
         """
-        if not qr_code_number or not qr_code_number.startswith('QR'):
-            raise ValueError("L'identifiant QR doit commencer par 'QR'.")
+        if not qr_code_number:
+            raise ValueError("L'identifiant QR ne peut pas être vide.")
+            
+        # Vérifier le format selon le préfixe
+        if not (qr_code_number.startswith('QR') or qr_code_number.startswith('IN')):
+            raise ValueError("L'identifiant QR doit commencer par 'QR' pour les bâtiments ou 'IN' pour les incidents.")
         
         # Déterminer le dossier de sortie
         if output_dir is None:

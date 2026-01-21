@@ -10,12 +10,12 @@ La table principale qui stocke les informations des immeubles.
 
 | Colonne | Type | Contraintes | Description |
 |---------|------|-------------|-------------|
-| ID | SERIAL | PRIMARY KEY | Identifiant unique auto-incrémenté |
-| CREATION_DATE | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Date et heure de création de l'enregistrement |
-| LOCATION | VARCHAR(255) | NOT NULL | Adresse ou emplacement de l'immeuble |
-| EMAIL_GESTIONNAIRE | VARCHAR(100) | NULL | Email du gestionnaire de l'immeuble |
-| NOTES | TEXT | NULL | Notes ou informations supplémentaires |
-| QR_CODE_NUMBER | VARCHAR(50) | NOT NULL, UNIQUE | Identifiant unique utilisé dans le QR code |
+| ID                    | SERIAL        | PRIMARY KEY  | Identifiant unique auto-incrémenté |
+| CREATION_DATE         | TIMESTAMP     | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Date et heure de création de l'enregistrement |
+| LOCATION              | VARCHAR(255)  | NOT NULL     | Adresse ou emplacement de l'immeuble |
+| EMAIL_GESTIONNAIRE    | VARCHAR(100)  | NULL         | Email du gestionnaire de l'immeuble |
+| NOTES                 | TEXT          | NULL         | Notes ou informations supplémentaires |
+| QR_CODE_NUMBER        | VARCHAR(50)   | NOT NULL, UNIQUE | Identifiant unique utilisé dans le QR code |
 
 ### Indexes
 

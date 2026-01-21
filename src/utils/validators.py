@@ -11,6 +11,7 @@ import jsonschema
 from jsonschema import ValidationError
 
 from src.utils.config import get_config
+from src.utils.schemas.incident_schema import INCIDENT_SCHEMA
 
 
 # Schéma de validation pour les données d'un immeuble
@@ -44,12 +45,14 @@ def validate_email(email: str) -> bool:
     return bool(re.match(pattern, email))
 
 
-def validate_qr_code_number(qr_code: str) -> bool:
+def validate_qr_code_number(qr_code: str, prefix: str = None) -> bool:
     """
     Valide un identifiant QR_CODE_NUMBER.
 
     Args:
         qr_code: Identifiant QR à valider.
+        prefix: Préfixe attendu ("QR" pour les bâtiments, "IN" pour les incidents).
+               Si None, accepte les deux formats.
 
     Returns:
         True si l'identifiant QR est valide, False sinon.
@@ -57,17 +60,26 @@ def validate_qr_code_number(qr_code: str) -> bool:
     if not qr_code:
         return False  # QR_CODE_NUMBER ne peut pas être vide
     
-    # Format: "QR" suivi de chiffres
-    pattern = r'^QR\d+$'
+    if prefix == "QR":
+        # Format: "QR" suivi de chiffres
+        pattern = r'^QR\d+$'
+    elif prefix == "IN":
+        # Format: "IN" suivi de chiffres
+        pattern = r'^IN\d+$'
+    else:
+        # Accepte les deux formats
+        pattern = r'^(QR|IN)\d+$'
+    
     return bool(re.match(pattern, qr_code))
 
 
-def validate_json_file(file_path: str) -> Dict[str, Any]:
+def validate_json_file(file_path: str, schema=None) -> Dict[str, Any]:
     """
     Valide un fichier JSON selon le schéma défini.
 
     Args:
         file_path: Chemin vers le fichier JSON à valider.
+        schema: Schéma de validation à utiliser. Si None, tente de détecter automatiquement.
 
     Returns:
         Dictionnaire contenant les données JSON validées.
@@ -100,16 +112,27 @@ def validate_json_file(file_path: str) -> Dict[str, Any]:
         except json.JSONDecodeError as e:
             raise json.JSONDecodeError(f"Le fichier '{file_path}' n'est pas un JSON valide: {str(e)}", e.doc, e.pos)
     
+    # Déterminer le schéma à utiliser
+    if schema is None:
+        # Détection automatique du type de données
+        if "BUILDING_ID" in data and "INCIDENT_INFORMATION" in data:
+            schema = INCIDENT_SCHEMA
+        else:
+            schema = BUILDING_SCHEMA
+    
     # Valider selon le schéma
     try:
-        jsonschema.validate(instance=data, schema=BUILDING_SCHEMA)
+        jsonschema.validate(instance=data, schema=schema)
     except ValidationError as e:
         raise ValidationError(f"Validation échouée: {str(e)}")
     
-    # Validation supplémentaire pour l'email
-    if "EMAIL_GESTIONNAIRE" in data and data["EMAIL_GESTIONNAIRE"]:
+    # Validation supplémentaire pour les emails
+    if schema == BUILDING_SCHEMA and "EMAIL_GESTIONNAIRE" in data and data["EMAIL_GESTIONNAIRE"]:
         if not validate_email(data["EMAIL_GESTIONNAIRE"]):
             raise ValidationError("Le format de l'email du gestionnaire est invalide.")
+    elif schema == INCIDENT_SCHEMA and "REPORTER_EMAIL" in data and data["REPORTER_EMAIL"]:
+        if not validate_email(data["REPORTER_EMAIL"]):
+            raise ValidationError("Le format de l'email du déclarant est invalide.")
     
     return data
 

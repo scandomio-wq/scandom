@@ -38,4 +38,15 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Table T_BUILDING créée avec succès."
+
+# Exécuter le script de création de la table T_INCIDENT
+echo "Création de la table T_INCIDENT..."
+PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f 002_create_incident_table.sql
+
+if [ $? -ne 0 ]; then
+    echo "Erreur: Impossible de créer la table T_INCIDENT."
+    exit 1
+fi
+
+echo "Table T_INCIDENT créée avec succès."
 echo "Initialisation de la base de données terminée."

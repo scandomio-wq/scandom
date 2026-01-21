@@ -1,0 +1,11 @@
+{
+  "BUILDING_QR_CODE": "QR5050332870",
+  "REPORTER_PHONE": "+33612345678",
+  "INCIDENT_INFORMATION": {
+    "zone": "Parking sous-sol",
+    "etage": "-1",
+    "categorie": "Sécurité",
+    "type": "Porte bloquée",
+    "informations_supplementaires": "La porte d'accès au niveau -1 du parking ne se ferme plus correctement. Risque de sécurité pour les véhicules et les résidents."
+  }
+}
