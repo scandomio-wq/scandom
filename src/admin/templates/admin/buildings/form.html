@@ -1,0 +1,47 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Ajouter un bâtiment - Administration Scandom{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">Ajouter un bâtiment</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.add_building') }}">
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Adresse / Emplacement *</label>
+                        <input type="text" class="form-control" id="location" name="location" required>
+                        <div class="form-text">Adresse complète du bâtiment (obligatoire)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email_gestionnaire" class="form-label">Email du gestionnaire</label>
+                        <input type="email" class="form-control" id="email_gestionnaire" name="email_gestionnaire">
+                        <div class="form-text">Email de contact pour le gestionnaire du bâtiment (optionnel)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                        <div class="form-text">Informations supplémentaires sur le bâtiment (optionnel)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="qr_code_number" class="form-label">Code QR</label>
+                        <input type="text" class="form-control" id="qr_code_number" name="qr_code_number" pattern="QR[0-9]+" placeholder="QR12345">
+                        <div class="form-text">Format: QR suivi de chiffres (ex: QR12345). Si laissé vide, un code sera généré automatiquement.</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.list_buildings') }}" class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

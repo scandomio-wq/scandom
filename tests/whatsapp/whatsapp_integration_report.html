@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport d'intégration WhatsApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .pass {
+            color: green;
+        }
+        .fail {
+            color: red;
+        }
+        .warning {
+            color: orange;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .progress {
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .summary-box {
+            flex: 1;
+            padding: 15px;
+            margin: 0 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rapport d'intégration WhatsApp</h1>
+    <p>Généré le 23/01/2026 à 18:18:45</p>
+    
+    <div class="summary">
+        <div class="summary-box">
+            <h3>Tests unitaires</h3>
+            <div class="progress-bar">
+                <div class="progress" style="width: 73.52941176470588%">
+                    73.5%
+                </div>
+            </div>
+            <p>25/34 tests réussis</p>
+        </div>
+        
+        <div class="summary-box">
+            <h3>Tests E2E</h3>
+            <div class="progress-bar">
+                <div class="progress" style="width: 0%">
+                    0.0%
+                </div>
+            </div>
+            <p>0/0 tests réussis</p>
+        </div>
+        
+        <div class="summary-box">
+            <h3>Critères de succès</h3>
+            <div class="progress-bar">
+                <div class="progress" style="width: 0.0%">
+                    0.0%
+                </div>
+            </div>
+            <p>0/7 critères satisfaits</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Tests unitaires</h2>
+        <table>
+            <tr>
+                <th>Métrique</th>
+                <th>Valeur</th>
+            </tr>
+            <tr>
+                <td>Tests exécutés</td>
+                <td>34</td>
+            </tr>
+            <tr>
+                <td>Tests réussis</td>
+                <td>25</td>
+            </tr>
+            <tr>
+                <td>Échecs</td>
+                <td>8</td>
+            </tr>
+            <tr>
+                <td>Erreurs</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>Tests ignorés</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Taux de réussite</td>
+                <td>73.53%</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>Tests de bout en bout</h2>
+        <table>
+            <tr>
+                <th>Métrique</th>
+                <th>Valeur</th>
+            </tr>
+            <tr>
+                <td>Tests exécutés</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Tests réussis</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Échecs</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Erreurs</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Taux de réussite</td>
+                <td>0.00%</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>Tests de performance</h2>
+        <table>
+            <tr>
+                <th>Métrique</th>
+                <th>Valeur</th>
+            </tr>
+            <tr>
+                <td>Utilisateurs simulés</td>
+                <td>100</td>
+            </tr>
+            <tr>
+                <td>Durée du test</td>
+                <td>60 secondes</td>
+            </tr>
+            <tr>
+                <td>Temps de réponse moyen</td>
+                <td>0.00 ms</td>
+            </tr>
+            <tr>
+                <td>Requêtes par seconde</td>
+                <td>0.00</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>Critères de succès</h2>
+        <table>
+            <tr>
+                <th>Critère</th>
+                <th>Statut</th>
+                <th>Description</th>
+            </tr>
+
+            <tr>
+                <td>SC-001</td>
+                <td class="fail">ERROR</td>
+                <td>Erreur lors de la vérification: 2</td>
+            </tr>
+            
+            <tr>
+                <td>SC-002</td>
+                <td class="fail">ERROR</td>
+                <td>Erreur lors de la vérification: 0</td>
+            </tr>
+            
+            <tr>
+                <td>SC-003</td>
+                <td class="warning">INCONCLUSIVE</td>
+                <td>Aucun temps de réponse trouvé pour l'analyse.</td>
+            </tr>
+            
+            <tr>
+                <td>SC-004</td>
+                <td class="fail">ERROR</td>
+                <td>Erreur lors de la vérification: 0</td>
+            </tr>
+            
+            <tr>
+                <td>SC-005</td>
+                <td class="fail">ERROR</td>
+                <td>Erreur lors de la vérification: 0</td>
+            </tr>
+            
+            <tr>
+                <td>SC-006</td>
+                <td class="warning">INCONCLUSIVE</td>
+                <td>Aucune donnée sur les conversations simultanées trouvée.</td>
+            </tr>
+            
+            <tr>
+                <td>SC-008</td>
+                <td class="fail">ERROR</td>
+                <td>Erreur lors de la vérification: 0</td>
+            </tr>
+            
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>Conclusion</h2>
+
+        <p class="fail"><strong>Score global: 24.51%</strong></p>
+        <p>L'intégration WhatsApp nécessite des corrections importantes avant d'être mise en production.</p>
+        
+        <h3>Recommandations</h3>
+        <ul>
+<li>Corriger les tests unitaires qui échouent.</li>
+        </ul>
+    </div>
+</body>
+</html>

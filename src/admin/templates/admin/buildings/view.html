@@ -1,0 +1,99 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Détails du bâtiment - Administration Scandom{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">Détails du bâtiment</h2>
+                <a href="{{ url_for('admin.list_buildings') }}" class="btn btn-sm btn-light">Retour à la liste</a>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h3 class="mb-3">Informations générales</h3>
+                        <table class="table">
+                            <tr>
+                                <th>ID</th>
+                                <td>{{ building.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>QR Code</th>
+                                <td class="qr-code">{{ building.qr_code_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Adresse</th>
+                                <td>{{ building.location }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email gestionnaire</th>
+                                <td>{{ building.email_gestionnaire or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date de création</th>
+                                <td>{{ building.creation_date.strftime('%d/%m/%Y %H:%M') if building.creation_date else '-' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="mb-3">Notes</h3>
+                        <div class="card">
+                            <div class="card-body">
+                                {% if building.notes %}
+                                    <p>{{ building.notes }}</p>
+                                {% else %}
+                                    <p class="text-muted">Aucune note disponible.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="mb-3">Code QR</h3>
+                        <div class="alert alert-info">
+                            <p>Pour générer une image QR code, utilisez la commande CLI:</p>
+                            <pre class="bg-light p-2 mt-2"><code>python -m src.cli.generate_qr {{ building.qr_code_number }}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('admin.list_buildings') }}" class="btn btn-secondary">Retour</a>
+                    <div>
+                        <a href="{{ url_for('admin.edit_building', building_id=building.id) }}" class="btn btn-warning me-2">Modifier</a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmation de suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer ce bâtiment ?</p>
+                <p><strong>Cette action est irréversible.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form action="{{ url_for('admin.delete_building', building_id=building.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
