@@ -2,7 +2,7 @@
 
 **Purpose**: Valider la complétude et la qualité des spécifications avant de passer à la planification
 **Created**: 2026-01-22
-**Feature**: [Spécification WhatsApp Incident Reporting](/home/jeremy/Documents/Projet/scandom/specs/001-whatsapp-incident-reporting/spec.md)
+**Feature**: [Spécification WhatsApp Incident Reporting](/home/jeremy/Documents/Projet/scandom/specs/005-whatsapp-incident-reporting/spec.md)
 
 ## Content Quality
 

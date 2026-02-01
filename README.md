@@ -122,6 +122,38 @@ Exemple :
 python src/cli/find_incident.py IN1234567890 --format json
 ```
 
+### Consulter l'historique des notifications email
+
+```bash
+python src/cli/view_email_history.py [--id <incident_id|qr_code>] [--limit <n>]
+```
+
+Exemple :
+```bash
+python src/cli/view_email_history.py --id IN1234567890
+```
+
+## Configuration des notifications email
+
+L'application envoie automatiquement des notifications par email aux gestionnaires de bâtiments lors de la création d'incidents via WhatsApp.
+
+1.  **Variables d'environnement** : Copiez `config/email/.env.example` vers `config/email/.env` et renseignez vos paramètres SMTP :
+    ```bash
+    SMTP_HOST=smtp.example.com
+    SMTP_PORT=587
+    SMTP_USER=votre_utilisateur
+    SMTP_PASSWORD=votre_mot_de_passe
+    SMTP_FROM_EMAIL=noreply@votre-domaine.com
+    SMTP_USE_TLS=true
+    ```
+
+2.  **Migration** : Assurez-vous d'avoir exécuté les migrations pour créer la table `email_notifications`.
+
+3.  **Worker Celery** : L'envoi étant asynchrone, un worker Celery doit être actif :
+    ```bash
+    celery -A src.whatsapp.tasks worker --loglevel=info
+    ```
+
 ## Format des données
 
 ### Fichier JSON pour les immeubles

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Incident {{ incident_qr_code }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+    <h1 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
+        L'incident n°{{ incident_qr_code }} a été créé
+    </h1>
+    
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid #3498db; margin: 20px 0;">
+        <h2 style="margin-top: 0; color: #2980b9;">Détails de l'incident</h2>
+        <p><strong>Bâtiment :</strong> {{ building_address }}</p>
+        <p><strong>Zone :</strong> {{ zone }}</p>
+        <p><strong>Étage :</strong> {{ floor }}</p>
+        <p><strong>Catégorie :</strong> {{ category }}</p>
+        <p><strong>Description :</strong><br>{{ description }}</p>
+        <p><strong>Déclaré le :</strong> {{ created_at }}</p>
+        <p><strong>Contact déclarant :</strong> {{ reporter_phone }}</p>
+    </div>
+    
+    {% if photo_urls %}
+    <div style="margin-top: 20px;">
+        <h2 style="color: #2980b9;">Photos</h2>
+        <ul style="list-style: none; padding-left: 0;">
+        {% for url in photo_urls %}
+            <li style="margin-bottom: 10px;">
+                <a href="{{ url }}" style="color: #3498db; text-decoration: none; font-weight: bold;">
+                    &rarr; Voir la Photo {{ loop.index }}
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <div style="margin-top: 30px; padding: 15px; background: #eef2f7; border-radius: 5px; font-size: 14px;">
+        <strong>Action requise :</strong> Veuillez consulter les détails complets de l'incident dans votre interface de gestion.
+    </div>
+    
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #7f8c8d; font-size: 12px; text-align: center;">
+        <p>Ce message a été envoyé automatiquement par le système <strong>SCANDOM</strong>.</p>
+        <p>&copy; 2026 Scandom - Notifications d'Incidents</p>
+    </footer>
+</body>
+</html>

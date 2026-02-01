@@ -596,9 +596,39 @@ class ConversationManager:
         if response == 'confirm':
             try:
                 # Créer l'incident
-                success, incident_id, error = create_incident_from_conversation(conversation, self.db_connection)
+                success, incident, error = create_incident_from_conversation(conversation, self.db_connection)
                 
-                if success:
+                if success and incident:
+                    # 1. Récupérer les informations du bâtiment pour l'email
+                    building = self.building_dao.get_building_by_qr_code(conversation.building_qr_code)
+                    
+                    # 2. Envoyer la notification par email si un gestionnaire est configuré
+                    if building and building.email_gestionnaire:
+                        from src.email.tasks import send_incident_email_task
+                        
+                        # Préparer les données pour le template
+                        incident_data = {
+                            "zone": conversation.collected_data.get('zone', 'N/A'),
+                            "floor": conversation.collected_data.get('etage', 'N/A'),
+                            "category": conversation.collected_data.get('categorie', 'N/A'),
+                            "description": conversation.collected_data.get('informations', 'Pas de description'),
+                            "photo_urls": conversation.collected_data.get('photos', []),
+                            "reporter_phone": conversation.user_phone,
+                            "created_at": incident.creation_date.strftime('%d/%m/%Y %H:%M') if incident.creation_date else datetime.now().strftime('%d/%m/%Y %H:%M')
+                        }
+                        
+                        # Dispatcher la tâche asynchrone
+                        send_incident_email_task.delay(
+                            incident_id=incident.id,
+                            incident_qr_code=incident.qr_code_number,
+                            building_address=building.location,
+                            manager_email=building.email_gestionnaire,
+                            incident_data=incident_data
+                        )
+                        logger.info(f"Tâche de notification email planifiée pour l'incident {incident.qr_code_number}")
+                    else:
+                        logger.warning(f"Pas d'email de gestionnaire trouvé pour le bâtiment {conversation.building_qr_code}. Notification ignorée.")
+
                     # Marquer la conversation comme terminée
                     conversation.complete()
                     conversation.current_step = ConversationStep.COMPLETED

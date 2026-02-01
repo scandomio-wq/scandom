@@ -22,7 +22,7 @@ logger = logging.getLogger('whatsapp.incident_api')
 
 
 def create_incident_from_conversation(conversation: ConversationState, 
-                                     db_connection: DatabaseConnection) -> Tuple[bool, Optional[str], Optional[str]]:
+                                     db_connection: DatabaseConnection) -> Tuple[bool, Optional[Incident], Optional[str]]:
     """
     Crée un incident à partir d'une conversation WhatsApp.
     
@@ -31,18 +31,18 @@ def create_incident_from_conversation(conversation: ConversationState,
         db_connection: Connexion à la base de données
         
     Returns:
-        Tuple[bool, Optional[str], Optional[str]]: (Succès, ID de l'incident ou None, Message d'erreur ou None)
+        Tuple[bool, Optional[Incident], Optional[str]]: (Succès, Objet Incident ou None, Message d'erreur ou None)
     """
     try:
         # Construire les données de l'incident
         incident_data = build_incident_data(conversation)
         
         # Tenter d'importer l'incident
-        success, incident_id, error_message = import_incident(incident_data, db_connection)
+        success, incident, error_message = import_incident(incident_data, db_connection)
         
-        if success:
-            logger.info(f"Incident créé avec succès: {incident_id}")
-            return True, incident_id, None
+        if success and incident:
+            logger.info(f"Incident créé avec succès: {incident.id}")
+            return True, incident, None
         else:
             logger.warning(f"Échec de création d'incident: {error_message}")
             
@@ -105,7 +105,7 @@ def build_incident_data(conversation: ConversationState) -> Dict[str, Any]:
 
 
 def import_incident(incident_data: Dict[str, Any], 
-                   db_connection: Optional[DatabaseConnection] = None) -> Tuple[bool, Optional[str], Optional[str]]:
+                   db_connection: Optional[DatabaseConnection] = None) -> Tuple[bool, Optional[Incident], Optional[str]]:
     """
     Importe un incident via l'API d'import.
     
@@ -114,7 +114,7 @@ def import_incident(incident_data: Dict[str, Any],
         db_connection: Connexion à la base de données (optionnel)
         
     Returns:
-        Tuple[bool, Optional[str], Optional[str]]: (Succès, ID de l'incident ou None, Message d'erreur ou None)
+        Tuple[bool, Optional[Incident], Optional[str]]: (Succès, Objet Incident ou None, Message d'erreur ou None)
     """
     try:
         # Créer l'incident via l'API existante
@@ -124,10 +124,10 @@ def import_incident(incident_data: Dict[str, Any],
         incident = Incident.from_json(incident_data)
         
         # Sauvegarder l'incident
-        incident_id = incident_dao.create_incident(incident)
+        created_incident = incident_dao.create_incident(incident)
         
-        if incident_id:
-            return True, incident_id, None
+        if created_incident and created_incident.id:
+            return True, created_incident, None
         else:
             return False, None, "Échec de création de l'incident dans la base de données"
     

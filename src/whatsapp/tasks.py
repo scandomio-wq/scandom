@@ -29,6 +29,7 @@ broker_url = whatsapp_config.get('celery', 'broker_url', fallback='redis://local
 result_backend = whatsapp_config.get('celery', 'result_backend', fallback='redis://localhost:6379/0')
 
 celery_app = Celery('whatsapp_tasks', broker=broker_url, backend=result_backend)
+celery_app.conf.include = ['src.email.tasks']
 
 # Configuration des options Celery depuis le fichier de configuration
 celery_app.conf.update(
@@ -133,15 +134,49 @@ def retry_import_incident(self, incident_id: str) -> bool:
             return False
         
         # Importer l'incident via l'API
-        # Note: Cette partie sera implémentée dans le module incident_api.py
         from src.whatsapp.incident_api import import_incident
         
-        success, error_message = import_incident(incident.incident_data)
+        success, incident, error_message = import_incident(incident.incident_data)
         
-        if success:
-            # Supprimer l'incident en attente
+        if success and incident:
+            # 1. Supprimer l'incident en attente
+            incident_id_str = incident.id # keep reference before delete
+            incident_qr = incident.qr_code_number
             incident.delete(db_connection)
             logger.info(f"Import réussi pour l'incident en attente {incident_id}")
+
+            # 2. Déclencher la notification email
+            try:
+                from src.db.building_dao import BuildingDAO
+                from src.email.tasks import send_incident_email_task
+                
+                building_dao = BuildingDAO()
+                building = building_dao.get_building_by_qr_code(incident.building_qr_code)
+                
+                if building and building.email_gestionnaire:
+                    # Préparer les données pour le template (même logique que dans conversation_manager)
+                    collected_data = incident.incident_information
+                    incident_data = {
+                        "zone": collected_data.get('zone', 'N/A'),
+                        "floor": str(collected_data.get('etage', 'N/A')),
+                        "category": collected_data.get('categorie', 'N/A'),
+                        "description": collected_data.get('informations_supplementaires', 'Pas de description'),
+                        "photo_urls": [], # On n'a pas les URLs ici facilement si non stockées
+                        "reporter_phone": incident.reporter_phone,
+                        "created_at": incident.creation_date.strftime('%d/%m/%Y %H:%M') if incident.creation_date else datetime.now().strftime('%d/%m/%Y %H:%M')
+                    }
+                    
+                    send_incident_email_task.delay(
+                        incident_id=incident.id,
+                        incident_qr_code=incident.qr_code_number,
+                        building_address=building.location,
+                        manager_email=building.email_gestionnaire,
+                        incident_data=incident_data
+                    )
+                    logger.info(f"Notification email planifiée après retry réussi pour l'incident {incident.qr_code_number}")
+            except Exception as e:
+                logger.error(f"Erreur lors du dispatch de l'email après retry: {e}")
+
             return True
         else:
             # Incrémenter le compteur de tentatives et planifier la prochaine tentative
@@ -199,76 +234,9 @@ def purge_old_data():
     stats = run_data_retention_tasks()
     
     return stats
-        conversation_days = whatsapp_config.getint('retention', 'conversation_days', fallback=365)
-        message_days = whatsapp_config.getint('retention', 'message_days', fallback=365)
-        pending_incident_days = whatsapp_config.getint('retention', 'pending_incident_days', fallback=30)
-        anonymize_after_days = whatsapp_config.getint('retention', 'anonymize_after_days', fallback=180)
-        
-        # Calculer les dates limites
-        conversation_cutoff = datetime.now() - timedelta(days=conversation_days)
-        message_cutoff = datetime.now() - timedelta(days=message_days)
-        pending_incident_cutoff = datetime.now() - timedelta(days=pending_incident_days)
-        anonymize_cutoff = datetime.now() - timedelta(days=anonymize_after_days)
-        
-        # Purger les anciennes conversations
-        query = """
-            DELETE FROM whatsapp_conversations
-            WHERE created_at < %s AND is_completed = TRUE
-            RETURNING conversation_id
-        """
-        result = db_connection.execute_query(query, (conversation_cutoff,), fetch_all=True)
-        results['conversations_purged'] = len(result) if result else 0
-        
-        # Purger les anciens messages
-        query = """
-            DELETE FROM whatsapp_messages
-            WHERE timestamp < %s
-            RETURNING message_id
-        """
-        result = db_connection.execute_query(query, (message_cutoff,), fetch_all=True)
-        results['messages_purged'] = len(result) if result else 0
-        
-        # Purger les anciens incidents en attente
-        query = """
-            DELETE FROM pending_incidents
-            WHERE created_at < %s
-            RETURNING id
-        """
-        result = db_connection.execute_query(query, (pending_incident_cutoff,), fetch_all=True)
-        results['pending_incidents_purged'] = len(result) if result else 0
-        
-        # Anonymiser les conversations plus anciennes que la limite d'anonymisation
-        query = """
-            UPDATE whatsapp_conversations
-            SET user_phone = 'anonymized',
-                collected_data = jsonb_set(
-                    collected_data,
-                    '{reporter_phone}',
-                    '"anonymized"',
-                    true
-                ),
-                collected_data = jsonb_set(
-                    collected_data,
-                    '{reporter_email}',
-                    '"anonymized"',
-                    true
-                )
-            WHERE created_at < %s
-              AND (user_phone != 'anonymized' OR collected_data->>'reporter_phone' IS NOT NULL OR collected_data->>'reporter_email' IS NOT NULL)
-            RETURNING conversation_id
-        """
-        result = db_connection.execute_query(query, (anonymize_cutoff,), fetch_all=True)
-        results['conversations_anonymized'] = len(result) if result else 0
-        
-        logger.info(f"Tâche de purge terminée: {results}")
-        return results
-    
-    except Exception as e:
-        logger.error(f"Erreur lors de la tâche de purge des anciennes données: {e}")
-        return {'error': str(e)}
 
 
-@app.task(bind=True)
+@celery_app.task(bind=True)
 def send_whatsapp_message(self, to: str, message: str, media_url: Optional[str] = None) -> Dict[str, Any]:
     """
     Tâche pour envoyer un message WhatsApp via Twilio.
